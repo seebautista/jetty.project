@@ -25,10 +25,10 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 
-import javax.net.websocket.EncodeException;
-import javax.net.websocket.RemoteEndpoint;
-import javax.net.websocket.SendHandler;
-import javax.net.websocket.SendResult;
+import javax.websocket.EncodeException;
+import javax.websocket.RemoteEndpoint;
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
 
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.log.Log;

@@ -18,16 +18,15 @@
 
 package org.eclipse.jetty.websocket.server;
 
-import javax.net.websocket.Endpoint;
-import javax.net.websocket.ServerContainer;
-import javax.net.websocket.ServerEndpointConfiguration;
+import javax.websocket.Endpoint;
+import javax.websocket.ServerContainer;
 
 import org.eclipse.jetty.websocket.client.JettyClientContainer;
 
 public class JettyServerContainer extends JettyClientContainer implements ServerContainer
 {
     @Override
-    public void publishServer(Endpoint endpoint, ServerEndpointConfiguration ilc)
+    public void publishServer(Class<? extends Endpoint> endpointClazz)
     {
         // TODO Auto-generated method stub
     }

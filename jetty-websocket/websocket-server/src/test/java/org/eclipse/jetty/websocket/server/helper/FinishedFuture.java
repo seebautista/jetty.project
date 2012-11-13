@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
-import javax.net.websocket.SendResult;
+import javax.websocket.SendResult;
 
 public class FinishedFuture extends FutureTask<SendResult> implements Future<SendResult>
 {

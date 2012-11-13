@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import javax.net.websocket.SendResult;
+import javax.websocket.SendResult;
 
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.log.Log;

@@ -21,7 +21,7 @@ package org.eclipse.jetty.websocket.common.extensions;
 import java.io.IOException;
 import java.util.concurrent.Future;
 
-import javax.net.websocket.SendResult;
+import javax.websocket.SendResult;
 
 import org.eclipse.jetty.io.ByteBufferPool;
 import org.eclipse.jetty.util.annotation.ManagedAttribute;

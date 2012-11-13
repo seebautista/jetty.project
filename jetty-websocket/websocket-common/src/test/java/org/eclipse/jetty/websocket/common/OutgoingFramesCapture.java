@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.*;
 import java.util.LinkedList;
 import java.util.concurrent.Future;
 
-import javax.net.websocket.SendResult;
+import javax.websocket.SendResult;
 
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.websocket.api.extensions.Frame;

@@ -20,8 +20,8 @@ package org.eclipse.jetty.websocket.common;
 
 import java.nio.ByteBuffer;
 
-import javax.net.websocket.SendHandler;
-import javax.net.websocket.SendResult;
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
 
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.StringUtil;

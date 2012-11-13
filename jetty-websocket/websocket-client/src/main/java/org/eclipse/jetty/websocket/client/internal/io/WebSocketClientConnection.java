@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
-import javax.net.websocket.SendResult;
+import javax.websocket.SendResult;
 
 import org.eclipse.jetty.io.EndPoint;
 import org.eclipse.jetty.websocket.api.extensions.Frame;

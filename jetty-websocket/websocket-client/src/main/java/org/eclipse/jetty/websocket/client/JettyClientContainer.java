@@ -20,11 +20,11 @@ package org.eclipse.jetty.websocket.client;
 
 import java.util.Set;
 
-import javax.net.websocket.ClientContainer;
-import javax.net.websocket.ClientEndpointConfiguration;
-import javax.net.websocket.DeploymentException;
-import javax.net.websocket.Endpoint;
-import javax.net.websocket.Session;
+import javax.websocket.ClientContainer;
+import javax.websocket.ClientEndpointConfiguration;
+import javax.websocket.DeploymentException;
+import javax.websocket.Endpoint;
+import javax.websocket.Session;
 
 public class JettyClientContainer implements ClientContainer
 {

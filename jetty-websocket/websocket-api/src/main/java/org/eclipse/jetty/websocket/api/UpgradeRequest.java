@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.net.websocket.HandshakeRequest;
+import javax.websocket.HandshakeRequest;
 
 import org.eclipse.jetty.websocket.api.extensions.ExtensionConfig;
 import org.eclipse.jetty.websocket.api.util.QuoteUtil;

@@ -31,14 +31,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
-import javax.net.websocket.ClientContainer;
-import javax.net.websocket.CloseReason;
-import javax.net.websocket.ContainerProvider;
-import javax.net.websocket.Encoder;
-import javax.net.websocket.MessageHandler;
-import javax.net.websocket.RemoteEndpoint;
-import javax.net.websocket.SendResult;
-import javax.net.websocket.Session;
+import javax.websocket.ClientContainer;
+import javax.websocket.CloseReason;
+import javax.websocket.ContainerProvider;
+import javax.websocket.Encoder;
+import javax.websocket.MessageHandler;
+import javax.websocket.RemoteEndpoint;
+import javax.websocket.SendResult;
+import javax.websocket.Session;
 
 import org.eclipse.jetty.util.MultiMap;
 import org.eclipse.jetty.util.StringUtil;
