@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
+import javax.websocket.MessageHandler;
+
 import org.eclipse.jetty.util.BufferUtil;
-import org.eclipse.jetty.websocket.common.events.AnnotatedEventDriver;
+import org.eclipse.jetty.websocket.common.WebSocketSession;
 
 /**
  * Support class for reading binary message data as an InputStream.
@@ -35,16 +37,18 @@ public class MessageInputStream extends InputStream implements MessageAppender
      * Threshold (of bytes) to perform compaction at
      */
     private static final int COMPACT_THRESHOLD = 5;
-    private final AnnotatedEventDriver driver;
+    private final WebSocketSession session;
+    private final MessageHandler.Basic<InputStream> handler;
     private final ByteBuffer buf;
     private int size;
     private boolean finished;
     private boolean needsNotification;
     private int readPosition;
 
-    public MessageInputStream(AnnotatedEventDriver driver)
+    public MessageInputStream(WebSocketSession session, MessageHandler.Basic<InputStream> handler)
     {
-        this.driver = driver;
+        this.session = session;
+        this.handler = handler;
         this.buf = ByteBuffer.allocate(BUFFER_SIZE);
         BufferUtil.clearToFill(this.buf);
         size = 0;
@@ -67,7 +71,7 @@ public class MessageInputStream extends InputStream implements MessageAppender
             return;
         }
 
-        driver.getPolicy().assertValidBinaryMessageSize(size + payload.remaining());
+        session.assertValidMessageSize(size + payload.remaining());
         size += payload.remaining();
 
         synchronized (buf)
@@ -81,7 +85,7 @@ public class MessageInputStream extends InputStream implements MessageAppender
         if (needsNotification)
         {
             needsNotification = true;
-            this.driver.onInputStream(this);
+            this.handler.onMessage(this);
         }
     }
 

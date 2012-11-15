@@ -16,25 +16,18 @@
 //  ========================================================================
 //
 
-package examples;
+package org.eclipse.jetty.websocket.common.endpoints;
 
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
-import org.eclipse.jetty.websocket.api.WebSocketConnection;
-import org.eclipse.jetty.websocket.common.endpoints.EventCapture;
+import java.util.ArrayList;
 
-public class AdapterConnectCloseSocket extends WebSocketAdapter
+/**
+ * Simple class for representing a list of class arrays.
+ */
+@SuppressWarnings("serial")
+public class ParamList extends ArrayList<Class<?>[]>
 {
-    public EventCapture capture = new EventCapture();
-
-    @Override
-    public void onWebSocketClose(int statusCode, String reason)
+    public void addParams(Class<?>... paramTypes)
     {
-        capture.add("onWebSocketClose(%d, %s)",statusCode,capture.q(reason));
-    }
-
-    @Override
-    public void onWebSocketConnect(WebSocketConnection connection)
-    {
-        capture.add("onWebSocketConnect(%s)",connection);
+        this.add(paramTypes);
     }
 }

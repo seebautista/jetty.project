@@ -36,7 +36,7 @@ import org.eclipse.jetty.websocket.client.WebSocketClient;
 import org.eclipse.jetty.websocket.client.WebSocketClientFactory;
 import org.eclipse.jetty.websocket.client.masks.Masker;
 import org.eclipse.jetty.websocket.client.masks.RandomMasker;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
 
 /**
  * WebSocketClient for working with Upgrade (request and response), and establishing connections to the websocket URI of your choice.
@@ -47,7 +47,7 @@ public class DefaultWebSocketClient extends FutureCallback<UpgradeResponse> impl
 
     private final WebSocketClientFactory factory;
     private final WebSocketPolicy policy;
-    private final EventDriver websocket;
+    private final AbstractEndpoint endpoint;
     private URI websocketUri;
     /**
      * The abstract WebSocketConnection in use and established for this client.
@@ -60,13 +60,13 @@ public class DefaultWebSocketClient extends FutureCallback<UpgradeResponse> impl
     private ClientUpgradeResponse upgradeResponse;
     private Masker masker;
 
-    public DefaultWebSocketClient(WebSocketClientFactory factory, EventDriver websocket)
+    public DefaultWebSocketClient(WebSocketClientFactory factory, AbstractEndpoint endpoint)
     {
         this.factory = factory;
         LOG.debug("factory.isRunning(): {}",factory.isRunning());
         LOG.debug("factory.isStarted(): {}",factory.isStarted());
         this.policy = factory.getPolicy();
-        this.websocket = websocket;
+        this.endpoint = endpoint;
         this.upgradeRequest = new ClientUpgradeRequest();
         this.masker = new RandomMasker();
     }
@@ -195,15 +195,10 @@ public class DefaultWebSocketClient extends FutureCallback<UpgradeResponse> impl
         return upgradeResponse;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.jetty.websocket.client.internal.WebSocketClient#getWebSocket()
-     */
     @Override
-    public EventDriver getWebSocket()
+    public AbstractEndpoint getWebSocketEndpoint()
     {
-        return websocket;
+        return endpoint;
     }
 
     /*

@@ -22,7 +22,7 @@ import java.net.URI;
 
 import org.eclipse.jetty.websocket.common.OutgoingFramesCapture;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
 import org.junit.rules.TestName;
 
 public class LocalWebSocketSession extends WebSocketSession
@@ -30,9 +30,9 @@ public class LocalWebSocketSession extends WebSocketSession
     private String id;
     private OutgoingFramesCapture outgoingCapture;
 
-    public LocalWebSocketSession(TestName testname, EventDriver driver)
+    public LocalWebSocketSession(TestName testname, AbstractEndpoint endpoint)
     {
-        super(URI.create("ws://localhost/LocalWebSocketSesssion/" + testname.getMethodName()),driver,new LocalWebSocketConnection(testname));
+        super(URI.create("ws://localhost/LocalWebSocketSesssion/" + testname.getMethodName()),endpoint,new LocalWebSocketConnection(testname));
         this.id = testname.getMethodName();
         outgoingCapture = new OutgoingFramesCapture();
         setOutgoingHandler(outgoingCapture);

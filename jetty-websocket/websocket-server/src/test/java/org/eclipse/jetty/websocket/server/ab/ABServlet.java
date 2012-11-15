@@ -38,8 +38,7 @@ public class ABServlet extends WebSocketServlet
 
         factory.getPolicy().setBufferSize(bigFrameSize);
         factory.getPolicy().setMaxPayloadSize(bigFrameSize);
-        factory.getPolicy().setMaxTextMessageSize(bigFrameSize);
-        factory.getPolicy().setMaxBinaryMessageSize(bigFrameSize);
+        factory.getPolicy().setMaxMessageSize(bigFrameSize);
 
         factory.register(ABSocket.class);
     }

@@ -21,7 +21,7 @@ package examples;
 import org.eclipse.jetty.websocket.api.WebSocketConnection;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.WebSocketListener;
-import org.eclipse.jetty.websocket.common.events.EventCapture;
+import org.eclipse.jetty.websocket.common.endpoints.EventCapture;
 
 public class ListenerBasicSocket implements WebSocketListener
 {

@@ -22,19 +22,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import javax.websocket.MessageHandler;
+
 import org.eclipse.jetty.util.BufferUtil;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
+import org.eclipse.jetty.websocket.common.WebSocketSession;
 
 public class SimpleBinaryMessage implements MessageAppender
 {
     private static final int BUFFER_SIZE = 65535;
-    private final EventDriver onEvent;
+    private final WebSocketSession session;
+    private final MessageHandler.Basic<byte[]> onEvent;
     private final ByteArrayOutputStream out;
     private int size;
     private boolean finished;
 
-    public SimpleBinaryMessage(EventDriver onEvent)
+    public SimpleBinaryMessage(WebSocketSession session, MessageHandler.Basic<byte[]> onEvent)
     {
+        this.session = session;
         this.onEvent = onEvent;
         this.out = new ByteArrayOutputStream(BUFFER_SIZE);
         finished = false;
@@ -54,7 +58,7 @@ public class SimpleBinaryMessage implements MessageAppender
             return;
         }
 
-        onEvent.getPolicy().assertValidBinaryMessageSize(size + payload.remaining());
+        session.assertValidMessageSize(size + payload.remaining());
         size += payload.remaining();
 
         BufferUtil.writeTo(payload,out);
@@ -64,7 +68,6 @@ public class SimpleBinaryMessage implements MessageAppender
     public void messageComplete()
     {
         finished = true;
-        byte data[] = out.toByteArray();
-        onEvent.onBinaryMessage(data);
+        onEvent.onMessage(out.toByteArray());
     }
 }

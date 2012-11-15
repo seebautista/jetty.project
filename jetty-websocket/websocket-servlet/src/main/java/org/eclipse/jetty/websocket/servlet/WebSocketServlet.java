@@ -69,17 +69,14 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
  * <dd>can be used to set the buffer size, which is also the max frame byte size<br>
  * <i>Default: 8192</i></dd>
  * 
- * <dt>maxIdleTime</dt>
+ * <dt>idleTimeout</dt>
  * <dd>set the time in ms that a websocket may be idle before closing<br>
- * <i>Default:</i></dd>
+ * <i>Default: 30000ms</i></dd>
  * 
- * <dt>maxTextMessagesSize</dt>
+ * <dt>maxMessagesSize</dt>
  * <dd>set the size in characters that a websocket may be accept before closing<br>
- * <i>Default:</i></dd>
+ * <i>Default: 64k</i></dd>
  * 
- * <dt>maxBinaryMessagesSize</dt>
- * <dd>set the size in bytes that a websocket may be accept before closing<br>
- * <i>Default:</i></dd>
  * </dl>
  */
 @SuppressWarnings("serial")
@@ -110,22 +107,16 @@ public abstract class WebSocketServlet extends HttpServlet
                 policy.setBufferSize(Integer.parseInt(bs));
             }
 
-            String max = getInitParameter("maxIdleTime");
+            String max = getInitParameter("idleTimeout");
             if (max != null)
             {
                 policy.setIdleTimeout(Integer.parseInt(max));
             }
 
-            max = getInitParameter("maxTextMessageSize");
+            max = getInitParameter("maxMessageSize");
             if (max != null)
             {
-                policy.setMaxTextMessageSize(Integer.parseInt(max));
-            }
-
-            max = getInitParameter("maxBinaryMessageSize");
-            if (max != null)
-            {
-                policy.setMaxBinaryMessageSize(Integer.parseInt(max));
+                policy.setMaxMessageSize(Integer.parseInt(max));
             }
 
             ServiceLoader<WebSocketServletFactory> loader = ServiceLoader.load(WebSocketServletFactory.class);

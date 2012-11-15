@@ -57,32 +57,30 @@ import org.eclipse.jetty.websocket.api.extensions.ExtensionFactory;
 import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.api.extensions.IncomingFrames;
 import org.eclipse.jetty.websocket.api.extensions.OutgoingFrames;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
 
 @ManagedObject
 public class WebSocketSession extends ContainerLifeCycle implements Session<Object>, WebSocketConnection, IncomingFrames
 {
     private static final Logger LOG = Log.getLogger(WebSocketSession.class);
     private final URI requestURI;
-    private final EventDriver websocket;
+    private final AbstractEndpoint endpoint;
     private final LogicalConnection connection;
     private Set<MessageHandler> messageHandlers = new HashSet<>();
     private List<Encoder> encoders = new ArrayList<>();
     private ExtensionFactory extensionFactory;
     private boolean active = false;
-    private long maximumMessageSize;
     private long inactiveTime;
     private List<String> negotiatedExtensions = new ArrayList<>();
     private String protocolVersion;
     private String negotiatedSubprotocol;
-    private long timeout;
     private Map<String, String[]> parameterMap = new HashMap<>();
     private WebSocketRemoteEndpoint remote;
     private IncomingFrames incomingHandler;
     private OutgoingFrames outgoingHandler;
     private WebSocketPolicy policy;
 
-    public WebSocketSession(URI requestURI, EventDriver websocket, LogicalConnection connection)
+    public WebSocketSession(URI requestURI, AbstractEndpoint endpoint, LogicalConnection connection)
     {
         if (requestURI == null)
         {
@@ -90,10 +88,10 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
         }
 
         this.requestURI = requestURI;
-        this.websocket = websocket;
+        this.endpoint = endpoint;
         this.connection = connection;
         this.outgoingHandler = connection;
-        this.incomingHandler = websocket;
+        this.incomingHandler = endpoint;
 
         // Get the parameter map (use the jetty MultiMap to do this right)
         MultiMap<String> params = new MultiMap<>();
@@ -116,6 +114,11 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     public void addMessageHandler(MessageHandler listener)
     {
         messageHandlers.add(listener);
+    }
+
+    public void assertValidMessageSize(int requestedSize)
+    {
+        policy.assertValidMessageSize(requestedSize);
     }
 
     @Override
@@ -198,7 +201,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public long getMaximumMessageSize()
     {
-        return maximumMessageSize;
+        return policy.getMaxMessageSize();
     }
 
     @Override
@@ -290,7 +293,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public long getTimeout()
     {
-        return timeout;
+        return policy.getIdleTimeout() / 1000;
     }
 
     /**
@@ -304,7 +307,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
             return; // input is closed
         }
         // Forward Errors to User WebSocket Object
-        websocket.incomingError(e);
+        endpoint.incomingError(e);
     }
 
     /**
@@ -359,8 +362,8 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
         this.active = true;
 
         // Open WebSocket
-        websocket.setSession(this);
-        websocket.onConnect();
+        endpoint.setSession(this);
+        endpoint.onConnect();
 
         if (LOG.isDebugEnabled())
         {
@@ -403,7 +406,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public void setMaximumMessageSize(long length)
     {
-        this.maximumMessageSize = length;
+        policy.setMaxMessageSize(length);
     }
 
     public void setNegotiatedExtensions(List<String> negotiatedExtensions)
@@ -433,7 +436,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public void setTimeout(long seconds)
     {
-        this.timeout = seconds;
+        policy.setIdleTimeout(seconds * 1000);
     }
 
     @Override
@@ -448,7 +451,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     {
         StringBuilder builder = new StringBuilder();
         builder.append("WebSocketSession[");
-        builder.append("websocket=").append(websocket);
+        builder.append("websocket=").append(endpoint);
         builder.append(",connection=").append(connection);
         builder.append(",remote=").append(remote);
         builder.append(",incoming=").append(incomingHandler);

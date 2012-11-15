@@ -16,16 +16,14 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common.events;
+package org.eclipse.jetty.websocket.common.endpoints;
+
+import static org.hamcrest.Matchers.*;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 
 @SuppressWarnings("serial")
 public class EventCapture extends ArrayList<String>
@@ -47,7 +45,15 @@ public class EventCapture extends ArrayList<String>
 
     public void assertEventCount(int expectedCount)
     {
-        Assert.assertThat("Event Count",size(),is(expectedCount));
+        int actualSize = size();
+        if (actualSize != expectedCount)
+        {
+            for (int i = 0; i < actualSize; i++)
+            {
+                System.out.printf("[%d] %s%n",i,get(i));
+            }
+            Assert.assertThat("Event Count",size(),is(expectedCount));
+        }
     }
 
     public void assertEventRegex(int eventNum, String regex)

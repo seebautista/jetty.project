@@ -16,7 +16,7 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common.events;
+package org.eclipse.jetty.websocket.common.endpoints;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -24,44 +24,26 @@ import java.nio.ByteBuffer;
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.Utf8Appendable.NotUtf8Exception;
-import org.eclipse.jetty.util.log.Log;
-import org.eclipse.jetty.util.log.Logger;
+import org.eclipse.jetty.websocket.api.BadPayloadException;
 import org.eclipse.jetty.websocket.api.CloseException;
 import org.eclipse.jetty.websocket.api.StatusCode;
 import org.eclipse.jetty.websocket.api.WebSocketException;
-import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.Frame;
-import org.eclipse.jetty.websocket.api.extensions.IncomingFrames;
 import org.eclipse.jetty.websocket.common.CloseInfo;
 import org.eclipse.jetty.websocket.common.OpCode;
 import org.eclipse.jetty.websocket.common.WebSocketFrame;
-import org.eclipse.jetty.websocket.common.WebSocketSession;
 
 /**
- * EventDriver is the main interface between the User's WebSocket POJO and the internal jetty implementation of WebSocket.
+ * Abstract Endpoint handler for Jetty websockets
+ * 
+ * @see JettyEndpoint
+ * @see JettyPojoEndpoint
  */
-public abstract class EventDriver implements IncomingFrames
+public abstract class AbstractJettyEndpoint extends AbstractEndpoint
 {
-    protected final Logger LOG;
-    protected final WebSocketPolicy policy;
-    protected final Object websocket;
-    protected WebSocketSession session;
-
-    public EventDriver(WebSocketPolicy policy, Object websocket)
+    public AbstractJettyEndpoint(Object websocket)
     {
-        this.policy = policy;
-        this.websocket = websocket;
-        this.LOG = Log.getLogger(websocket.getClass());
-    }
-
-    public WebSocketPolicy getPolicy()
-    {
-        return policy;
-    }
-
-    public WebSocketSession getSession()
-    {
-        return session;
+        super(websocket);
     }
 
     @Override
@@ -86,7 +68,7 @@ public abstract class EventDriver implements IncomingFrames
     {
         if (LOG.isDebugEnabled())
         {
-            LOG.debug("{}.onFrame({})",websocket.getClass().getSimpleName(),frame);
+            LOG.debug("incomingFrame({})",frame);
         }
 
         onFrame(frame);
@@ -126,50 +108,54 @@ public abstract class EventDriver implements IncomingFrames
                 }
                 case OpCode.BINARY:
                 {
-                    onBinaryFrame(frame.getPayload(),frame.isFin());
+                    onBinaryFragment(frame.getPayload(),frame.isFin());
                     return;
                 }
                 case OpCode.TEXT:
                 {
-                    onTextFrame(frame.getPayload(),frame.isFin());
+                    onTextFragment(frame.getPayload(),frame.isFin());
                     return;
                 }
             }
         }
         catch (NotUtf8Exception e)
         {
+            LOG.debug(e);
+            onException(new BadPayloadException(e));
             terminateConnection(StatusCode.BAD_PAYLOAD,e.getMessage());
         }
         catch (CloseException e)
         {
+            LOG.debug(e);
+            onException(e);
             terminateConnection(e.getStatusCode(),e.getMessage());
+        }
+        catch (WebSocketException e)
+        {
+            LOG.debug(e);
+            onException(e);
+            unhandled(e);
         }
         catch (Throwable t)
         {
+            LOG.debug(t);
+            onException(new WebSocketException(t));
             unhandled(t);
         }
     }
 
-    public abstract void onBinaryFrame(ByteBuffer buffer, boolean fin) throws IOException;
-
-    public abstract void onBinaryMessage(byte[] data);
+    public abstract void onBinaryFragment(ByteBuffer payload, boolean fin) throws IOException;
 
     public abstract void onClose(CloseInfo close);
 
-    public abstract void onConnect();
-
     public abstract void onException(WebSocketException e);
 
-    public abstract void onFrame(Frame frame);
-
-    public abstract void onTextFrame(ByteBuffer buffer, boolean fin) throws IOException;
-
-    public abstract void onTextMessage(String message);
-
-    public void setSession(WebSocketSession session)
+    public void onFrame(Frame frame)
     {
-        this.session = session;
+        /* override to do something */
     }
+
+    public abstract void onTextFragment(ByteBuffer payload, boolean fin) throws IOException;
 
     protected void terminateConnection(int statusCode, String rawreason)
     {

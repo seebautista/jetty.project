@@ -18,7 +18,6 @@
 
 package org.eclipse.jetty.websocket.api;
 
-
 /**
  * Settings for WebSocket operations.
  */
@@ -35,16 +34,6 @@ public class WebSocketPolicy
     }
 
     /**
-     * Automatically fragment large frames.
-     * <p>
-     * If frames are encountered at size larger than {@link #maxPayloadSize} then they are automatically fragmented into pieces fitting within the
-     * maxPayloadSize.
-     * <p>
-     * Default: false
-     */
-    private boolean autoFragment = false;
-
-    /**
      * The maximum allowed payload size (validated in both directions)
      * <p>
      * Default: 65536 (64K)
@@ -52,18 +41,11 @@ public class WebSocketPolicy
     private int maxPayloadSize = 65536;
 
     /**
-     * The maximum size of a text message during parsing/generating.
+     * The maximum size of a message (text or binary) allowed
      * <p>
      * Default: 16384 (16 K)
      */
-    private int maxTextMessageSize = 16384;
-
-    /**
-     * The maximum size of a binary message during parsing/generating.
-     * <p>
-     * Default: -1 (no validation)
-     */
-    private int maxBinaryMessageSize = -1;
+    private long maxMessageSize = 16384;
 
     /**
      * Maximum Message Buffer size, which is also the max frame byte size.
@@ -79,7 +61,7 @@ public class WebSocketPolicy
      * <p>
      * Default: 300000 (ms)
      */
-    private int idleTimeout = 300000;
+    private long idleTimeout = 300000;
 
     /**
      * Behavior of the websockets
@@ -91,15 +73,12 @@ public class WebSocketPolicy
         this.behavior = behavior;
     }
 
-    public void assertValidBinaryMessageSize(int requestedSize)
+    public void assertValidMessageSize(int requestedSize)
     {
-        if (maxBinaryMessageSize > 0)
+        // validate it
+        if (requestedSize > maxMessageSize)
         {
-            // validate it
-            if (requestedSize > maxBinaryMessageSize)
-            {
-                throw new MessageTooLargeException("Requested binary message size [" + requestedSize + "] exceeds maximum size [" + maxBinaryMessageSize + "]");
-            }
+            throw new MessageTooLargeException("Requested message size [" + requestedSize + "] exceeds maximum size [" + maxMessageSize + "]");
         }
     }
 
@@ -112,27 +91,13 @@ public class WebSocketPolicy
         }
     }
 
-    public void assertValidTextMessageSize(int requestedSize)
-    {
-        if (maxTextMessageSize > 0)
-        {
-            // validate it
-            if (requestedSize > maxTextMessageSize)
-            {
-                throw new MessageTooLargeException("Requested text message size [" + requestedSize + "] exceeds maximum size [" + maxTextMessageSize + "]");
-            }
-        }
-    }
-
     public WebSocketPolicy clonePolicy()
     {
         WebSocketPolicy clone = new WebSocketPolicy(this.behavior);
-        clone.autoFragment = this.autoFragment;
         clone.idleTimeout = this.idleTimeout;
         clone.bufferSize = this.bufferSize;
         clone.maxPayloadSize = this.maxPayloadSize;
-        clone.maxBinaryMessageSize = this.maxBinaryMessageSize;
-        clone.maxTextMessageSize = this.maxTextMessageSize;
+        clone.maxMessageSize = this.maxMessageSize;
         return clone;
     }
 
@@ -146,14 +111,14 @@ public class WebSocketPolicy
         return bufferSize;
     }
 
-    public int getIdleTimeout()
+    public long getIdleTimeout()
     {
         return idleTimeout;
     }
 
-    public int getMaxBinaryMessageSize()
+    public long getMaxMessageSize()
     {
-        return maxBinaryMessageSize;
+        return maxMessageSize;
     }
 
     public int getMaxPayloadSize()
@@ -161,34 +126,23 @@ public class WebSocketPolicy
         return maxPayloadSize;
     }
 
-    public int getMaxTextMessageSize()
-    {
-        return maxTextMessageSize;
-    }
-
-    public boolean isAutoFragment()
-    {
-        return autoFragment;
-    }
-
-    public void setAutoFragment(boolean autoFragment)
-    {
-        this.autoFragment = autoFragment;
-    }
-
     public void setBufferSize(int bufferSize)
     {
         this.bufferSize = bufferSize;
     }
 
-    public void setIdleTimeout(int idleTimeout)
+    public void setIdleTimeout(long idleTimeout)
     {
         this.idleTimeout = idleTimeout;
     }
 
-    public void setMaxBinaryMessageSize(int maxBinaryMessageSize)
+    public void setMaxMessageSize(long maxMessageSize)
     {
-        this.maxBinaryMessageSize = maxBinaryMessageSize;
+        this.maxMessageSize = maxMessageSize;
+        if (maxMessageSize <= 0)
+        {
+            throw new IllegalArgumentException("Max Message Size must be 1 byte or larger");
+        }
     }
 
     public void setMaxPayloadSize(int maxPayloadSize)
@@ -199,10 +153,4 @@ public class WebSocketPolicy
         }
         this.maxPayloadSize = maxPayloadSize;
     }
-
-    public void setMaxTextMessageSize(int maxTextMessageSize)
-    {
-        this.maxTextMessageSize = maxTextMessageSize;
-    }
-
 }

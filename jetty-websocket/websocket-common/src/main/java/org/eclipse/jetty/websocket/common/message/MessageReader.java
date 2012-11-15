@@ -22,8 +22,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.ByteBuffer;
 
+import javax.websocket.MessageHandler;
+
 import org.eclipse.jetty.util.Utf8StringBuilder;
-import org.eclipse.jetty.websocket.common.events.AnnotatedEventDriver;
+import org.eclipse.jetty.websocket.common.WebSocketSession;
 
 /**
  * Support class for reading text message data as an Reader.
@@ -32,15 +34,17 @@ import org.eclipse.jetty.websocket.common.events.AnnotatedEventDriver;
  */
 public class MessageReader extends Reader implements MessageAppender
 {
-    private final AnnotatedEventDriver driver;
+    private final WebSocketSession session;
+    private final MessageHandler.Basic<Reader> handler;
     private final Utf8StringBuilder utf;
     private int size;
     private boolean finished;
     private boolean needsNotification;
 
-    public MessageReader(AnnotatedEventDriver driver)
+    public MessageReader(WebSocketSession session, MessageHandler.Basic<Reader> handler)
     {
-        this.driver = driver;
+        this.session = session;
+        this.handler = handler;
         this.utf = new Utf8StringBuilder();
         size = 0;
         finished = false;
@@ -61,7 +65,7 @@ public class MessageReader extends Reader implements MessageAppender
             return;
         }
 
-        driver.getPolicy().assertValidTextMessageSize(size + payload.remaining());
+        session.assertValidMessageSize(size + payload.remaining());
         size += payload.remaining();
 
         synchronized (utf)
@@ -72,7 +76,7 @@ public class MessageReader extends Reader implements MessageAppender
         if (needsNotification)
         {
             needsNotification = true;
-            this.driver.onReader(this);
+            handler.onMessage(this);
         }
     }
 

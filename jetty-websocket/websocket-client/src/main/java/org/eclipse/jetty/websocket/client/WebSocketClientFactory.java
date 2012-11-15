@@ -41,8 +41,8 @@ import org.eclipse.jetty.websocket.api.extensions.ExtensionFactory;
 import org.eclipse.jetty.websocket.client.internal.ConnectionManager;
 import org.eclipse.jetty.websocket.client.internal.DefaultWebSocketClient;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
-import org.eclipse.jetty.websocket.common.events.EventDriverFactory;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
+import org.eclipse.jetty.websocket.common.endpoints.EndpointFactory;
 import org.eclipse.jetty.websocket.common.extensions.WebSocketExtensionFactory;
 
 public class WebSocketClientFactory extends ContainerLifeCycle
@@ -52,7 +52,6 @@ public class WebSocketClientFactory extends ContainerLifeCycle
     private final ByteBufferPool bufferPool = new MappedByteBufferPool();
     private final Executor executor;
     private final Scheduler scheduler;
-    private final EventDriverFactory eventDriverFactory;
     private final WebSocketPolicy policy;
     private final WebSocketExtensionFactory extensionRegistry;
     private SocketAddress bindAddress;
@@ -102,8 +101,6 @@ public class WebSocketClientFactory extends ContainerLifeCycle
 
         this.connectionManager = new ConnectionManager(bufferPool,executor,scheduler,sslContextFactory,policy);
         addBean(this.connectionManager);
-
-        this.eventDriverFactory = new EventDriverFactory(policy);
     }
 
     public WebSocketClientFactory(SslContextFactory sslContextFactory)
@@ -189,8 +186,8 @@ public class WebSocketClientFactory extends ContainerLifeCycle
     public WebSocketClient newWebSocketClient(Object websocketPojo)
     {
         LOG.debug("Creating new WebSocket for {}",websocketPojo);
-        EventDriver websocket = eventDriverFactory.wrap(websocketPojo);
-        return new DefaultWebSocketClient(this,websocket);
+        AbstractEndpoint endpoint = EndpointFactory.create(websocketPojo);
+        return new DefaultWebSocketClient(this,endpoint);
     }
 
     public boolean sessionClosed(WebSocketSession session)

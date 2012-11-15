@@ -48,8 +48,8 @@ import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.api.extensions.ExtensionFactory;
 import org.eclipse.jetty.websocket.common.LogicalConnection;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
-import org.eclipse.jetty.websocket.common.events.EventDriverFactory;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
+import org.eclipse.jetty.websocket.common.endpoints.EndpointFactory;
 import org.eclipse.jetty.websocket.common.extensions.ExtensionStack;
 import org.eclipse.jetty.websocket.common.extensions.WebSocketExtensionFactory;
 import org.eclipse.jetty.websocket.server.handshake.HandshakeRFC6455;
@@ -87,7 +87,6 @@ public class WebSocketServerFactory extends ContainerLifeCycle implements WebSoc
     private final Scheduler scheduler = new TimerScheduler();
     private final String supportedVersions;
     private final WebSocketPolicy basePolicy;
-    private final EventDriverFactory eventDriverFactory;
     private final WebSocketExtensionFactory extensionFactory;
     private WebSocketCreator creator;
     private List<Class<?>> registeredSocketClasses;
@@ -110,7 +109,6 @@ public class WebSocketServerFactory extends ContainerLifeCycle implements WebSoc
         this.registeredSocketClasses = new ArrayList<>();
 
         this.basePolicy = policy;
-        this.eventDriverFactory = new EventDriverFactory(basePolicy);
         this.extensionFactory = new WebSocketExtensionFactory(basePolicy,bufferPool);
         this.creator = this;
 
@@ -166,8 +164,9 @@ public class WebSocketServerFactory extends ContainerLifeCycle implements WebSoc
         }
 
         // Send the upgrade
-        EventDriver driver = eventDriverFactory.wrap(websocketPojo);
-        return upgrade(sockreq,sockresp,driver);
+        AbstractEndpoint endpoint = EndpointFactory.create(websocketPojo);
+        endpoint.setPolicy(getPolicy().clonePolicy());
+        return upgrade(sockreq,sockresp,endpoint);
     }
 
     @Override
@@ -355,11 +354,11 @@ public class WebSocketServerFactory extends ContainerLifeCycle implements WebSoc
      *            The request to upgrade
      * @param response
      *            The response to upgrade
-     * @param driver
-     *            The websocket handler implementation to use
+     * @param endpoint
+     *            The websocket endpoint implementation to use
      * @throws IOException
      */
-    public boolean upgrade(ServletWebSocketRequest request, ServletWebSocketResponse response, EventDriver driver) throws IOException
+    public boolean upgrade(ServletWebSocketRequest request, ServletWebSocketResponse response, AbstractEndpoint endpoint) throws IOException
     {
         if (!"websocket".equalsIgnoreCase(request.getHeader("Upgrade")))
         {
@@ -402,7 +401,7 @@ public class WebSocketServerFactory extends ContainerLifeCycle implements WebSoc
             EndPoint endp = http.getEndPoint();
             Executor executor = http.getConnector().getExecutor();
             ByteBufferPool bufferPool = http.getConnector().getByteBufferPool();
-            WebSocketServerConnection wsConnection = new WebSocketServerConnection(endp,executor,scheduler,driver.getPolicy(),bufferPool,this);
+            WebSocketServerConnection wsConnection = new WebSocketServerConnection(endp,executor,scheduler,getPolicy(),bufferPool,this);
             connection = wsConnection;
 
             extensionStack.configure(wsConnection.getParser());
@@ -413,7 +412,7 @@ public class WebSocketServerFactory extends ContainerLifeCycle implements WebSoc
         }
 
         // Setup Session
-        WebSocketSession session = new WebSocketSession(request.getRequestURI(),driver,connection);
+        WebSocketSession session = new WebSocketSession(request.getRequestURI(),endpoint,connection);
         session.setPolicy(getPolicy().clonePolicy());
         session.setNegotiatedSubprotocol(response.getAcceptedSubProtocol());
         session.setNegotiatedExtensions(extensionStack.getNegotiatedExtensions());

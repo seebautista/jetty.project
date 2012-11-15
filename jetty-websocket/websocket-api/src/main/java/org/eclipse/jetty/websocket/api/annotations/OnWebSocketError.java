@@ -27,22 +27,20 @@ import java.lang.annotation.Target;
 import org.eclipse.jetty.websocket.api.WebSocketConnection;
 
 /**
- * (ADVANCED) Annotation for tagging methods to receive frame events.
- * <p>
- * Note: any frame derived from {@link Frame} is acceptable to use as the last parameter here.
+ * Annotation for receiving errors from the websocket framework.
  * <p>
  * Acceptable method patterns.<br>
  * Note: <code>methodName</code> can be any name you want to use.
  * <ol>
- * <li><code>public void methodName({@link Frame} frame)</code></li>
- * <li><code>public void methodName({@link WebSocketConnection} conn, {@link Frame} frame)</code></li>
+ * <li><code>public void methodName({@link Throwable} t)</code></li>
+ * <li><code>public void methodName({@link WebSocketConnection} conn, {@link Throwable} t)</code></li>
  * </ol>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value =
 { ElementType.METHOD })
-public @interface OnWebSocketFrame
+public @interface OnWebSocketError
 {
     /* no config */
 }

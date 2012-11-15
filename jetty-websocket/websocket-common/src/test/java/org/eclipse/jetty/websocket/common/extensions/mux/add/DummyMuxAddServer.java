@@ -26,8 +26,8 @@ import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.UpgradeResponse;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
-import org.eclipse.jetty.websocket.common.events.EventDriverFactory;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
+import org.eclipse.jetty.websocket.common.endpoints.EndpointFactory;
 import org.eclipse.jetty.websocket.common.extensions.mux.MuxChannel;
 import org.eclipse.jetty.websocket.common.extensions.mux.MuxException;
 import org.eclipse.jetty.websocket.common.extensions.mux.Muxer;
@@ -44,12 +44,10 @@ public class DummyMuxAddServer implements MuxAddServer
     private static final Logger LOG = Log.getLogger(DummyMuxAddServer.class);
     private AdapterEchoSocket echo;
     private WebSocketPolicy policy;
-    private EventDriverFactory eventDriverFactory;
 
     public DummyMuxAddServer()
     {
         this.policy = WebSocketPolicy.newServerPolicy();
-        this.eventDriverFactory = new EventDriverFactory(policy);
         this.echo = new AdapterEchoSocket();
     }
 
@@ -77,8 +75,8 @@ public class DummyMuxAddServer implements MuxAddServer
         // not meaningful (per Draft 08) hresp.append("Sec-WebSocket-Accept: Kgo85/8KVE8YPONSeyhgL3GwqhI=\r\n");
         response.append("\r\n");
 
-        EventDriver websocket = this.eventDriverFactory.wrap(echo);
-        WebSocketSession session = new WebSocketSession(request.getRequestURI(),websocket,channel);
+        AbstractEndpoint endpoint = EndpointFactory.create(echo);
+        WebSocketSession session = new WebSocketSession(request.getRequestURI(),endpoint,channel);
         session.setNegotiatedSubprotocol("echo");
         channel.setSession(session);
         channel.setSubProtocol("echo");

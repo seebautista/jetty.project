@@ -44,7 +44,7 @@ import org.eclipse.jetty.websocket.client.ClientUpgradeResponse;
 import org.eclipse.jetty.websocket.client.internal.DefaultWebSocketClient;
 import org.eclipse.jetty.websocket.common.AcceptHash;
 import org.eclipse.jetty.websocket.common.WebSocketSession;
-import org.eclipse.jetty.websocket.common.events.EventDriver;
+import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
 
 /**
  * This is the initial connection handling that exists immediately after physical connection is established to destination server.
@@ -213,11 +213,11 @@ public class UpgradeConnection extends AbstractConnection
         WebSocketClientConnection connection = new WebSocketClientConnection(endp,executor,client);
 
         // Initialize / Negotiate Extensions
-        EventDriver websocket = client.getWebSocket();
+        AbstractEndpoint endpoint = client.getWebSocketEndpoint();
         WebSocketPolicy policy = client.getPolicy();
         String acceptedSubProtocol = response.getAcceptedSubProtocol();
 
-        WebSocketSession session = new WebSocketSession(request.getRequestURI(),websocket,connection);
+        WebSocketSession session = new WebSocketSession(request.getRequestURI(),endpoint,connection);
         session.setPolicy(policy);
         session.setNegotiatedSubprotocol(acceptedSubProtocol);
 

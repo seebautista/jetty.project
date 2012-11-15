@@ -16,18 +16,12 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common.events;
-
-import java.util.ArrayList;
+package org.eclipse.jetty.websocket.common.endpoints;
 
 /**
- * Simple class for representing a list of class arrays.
+ * Represents the metadata associated with Annotation discovery of a specific class.
  */
-@SuppressWarnings("serial")
-public class ParamList extends ArrayList<Class<?>[]>
+public class JavaxPojoMetadata
 {
-    public void addParams(Class<?>... paramTypes)
-    {
-        this.add(paramTypes);
-    }
+
 }

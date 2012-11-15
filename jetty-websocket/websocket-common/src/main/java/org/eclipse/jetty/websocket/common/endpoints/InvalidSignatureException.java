@@ -16,7 +16,7 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common.events;
+package org.eclipse.jetty.websocket.common.endpoints;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

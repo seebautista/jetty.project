@@ -16,25 +16,32 @@
 //  ========================================================================
 //
 
-package examples;
+package org.eclipse.jetty.websocket.server;
 
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
-import org.eclipse.jetty.websocket.api.WebSocketConnection;
-import org.eclipse.jetty.websocket.common.endpoints.EventCapture;
+import javax.websocket.WebSocketEndpoint;
 
-public class AdapterConnectCloseSocket extends WebSocketAdapter
+import org.eclipse.jetty.annotations.AnnotationIntrospector.AbstractIntrospectableAnnotationHandler;
+import org.eclipse.jetty.util.log.Log;
+import org.eclipse.jetty.util.log.Logger;
+
+public class JavaxWebsocketAnnotationHandler extends AbstractIntrospectableAnnotationHandler
 {
-    public EventCapture capture = new EventCapture();
+    private static final Logger LOG = Log.getLogger(JavaxWebsocketAnnotationHandler.class);
 
-    @Override
-    public void onWebSocketClose(int statusCode, String reason)
+    public JavaxWebsocketAnnotationHandler(boolean introspectAncestors)
     {
-        capture.add("onWebSocketClose(%d, %s)",statusCode,capture.q(reason));
+        super(introspectAncestors);
     }
 
     @Override
-    public void onWebSocketConnect(WebSocketConnection connection)
+    public void doHandle(Class<?> clazz)
     {
-        capture.add("onWebSocketConnect(%s)",connection);
+        WebSocketEndpoint endpoint = clazz.getAnnotation(WebSocketEndpoint.class);
+        if (endpoint == null)
+        {
+            return; // nothing to do
+        }
+
+        LOG.debug("Found @WebSocketEndpoint -> {}",clazz);
     }
 }
