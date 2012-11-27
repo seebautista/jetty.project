@@ -16,35 +16,22 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common;
+package org.eclipse.jetty.websocket.common.encoders;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
-import javax.websocket.SendResult;
+import javax.websocket.EncodeException;
+import javax.websocket.Encoder;
 
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+import org.eclipse.jetty.util.BufferUtil;
+
+public class DefaultBinaryStreamEncoder implements Encoder.BinaryStream<ByteBuffer>
 {
-    private static class FailedRunner implements Callable<SendResult>
+    @Override
+    public void encode(ByteBuffer message, OutputStream out) throws EncodeException, IOException
     {
-        private final SendResult result;
-
-        public FailedRunner(Throwable error)
-        {
-            this.result = new SendResult(error);
-        }
-
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
-    }
-
-    public FailedFuture(Throwable error)
-    {
-        super(new FailedRunner(error));
-        run();
+        BufferUtil.writeTo(message,out);
     }
 }

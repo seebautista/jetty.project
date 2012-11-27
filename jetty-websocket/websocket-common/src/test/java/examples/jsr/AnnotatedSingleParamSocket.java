@@ -16,35 +16,37 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common;
+package examples.jsr;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.websocket.SendResult;
+import javax.websocket.WebSocketEndpoint;
+import javax.websocket.WebSocketMessage;
+import javax.websocket.WebSocketPathParam;
 
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+/**
+ * Parameterized Socket showing @WebSocketMessage declarations
+ */
+@WebSocketEndpoint("/params/{a}")
+public class AnnotatedSingleParamSocket
 {
-    private static class FailedRunner implements Callable<SendResult>
+    private List<String> events = new ArrayList<>();
+
+    private void addEvent(String format, Object... args)
     {
-        private final SendResult result;
-
-        public FailedRunner(Throwable error)
-        {
-            this.result = new SendResult(error);
-        }
-
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
+        events.add(String.format(format,args));
     }
 
-    public FailedFuture(Throwable error)
+    @WebSocketMessage
+    public void onByteArray(@WebSocketPathParam("a") String a, byte buf[])
     {
-        super(new FailedRunner(error));
-        run();
+        addEvent("onByteArray(String a, byte buf[])");
+    }
+
+    @WebSocketMessage
+    public void onText(@WebSocketPathParam("a") String a, String message)
+    {
+        addEvent("onTextMessage(String a, String message)");
     }
 }

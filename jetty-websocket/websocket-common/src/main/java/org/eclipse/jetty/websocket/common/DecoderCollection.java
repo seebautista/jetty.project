@@ -18,33 +18,7 @@
 
 package org.eclipse.jetty.websocket.common;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-
-import javax.websocket.SendResult;
-
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+public class DecoderCollection
 {
-    private static class FailedRunner implements Callable<SendResult>
-    {
-        private final SendResult result;
 
-        public FailedRunner(Throwable error)
-        {
-            this.result = new SendResult(error);
-        }
-
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
-    }
-
-    public FailedFuture(Throwable error)
-    {
-        super(new FailedRunner(error));
-        run();
-    }
 }

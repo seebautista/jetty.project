@@ -18,33 +18,26 @@
 
 package org.eclipse.jetty.websocket.common;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.List;
 
-import javax.websocket.SendResult;
+import javax.websocket.EncodeException;
+import javax.websocket.Encoder;
 
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+public class EncoderCollection
 {
-    private static class FailedRunner implements Callable<SendResult>
+    public Encoder getForObject(Object o) throws EncodeException
     {
-        private final SendResult result;
-
-        public FailedRunner(Throwable error)
+        if (o == null)
         {
-            this.result = new SendResult(error);
+            throw new EncodeException(o,"Cannot determine encoder for null object");
         }
 
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
+        // TODO Auto-generated method stub
+        throw new EncodeException(o,"No valid encoder for object " + o.getClass().getName() + " found");
     }
 
-    public FailedFuture(Throwable error)
+    public void setEncoders(List<Encoder> encoders)
     {
-        super(new FailedRunner(error));
-        run();
+        // TODO Auto-generated method stub
     }
 }

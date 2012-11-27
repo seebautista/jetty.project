@@ -16,35 +16,27 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common;
+package org.eclipse.jetty.websocket.common.message.platform;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.io.InputStream;
 
-import javax.websocket.SendResult;
+import javax.websocket.MessageHandler;
 
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+/**
+ * Binary Stream Message Handler
+ */
+public class BinaryStreamMessageHandler implements MessageHandler.Async<InputStream>, MessageHandler.Basic<InputStream>
 {
-    private static class FailedRunner implements Callable<SendResult>
+    @Override
+    public void onMessage(InputStream message)
     {
-        private final SendResult result;
-
-        public FailedRunner(Throwable error)
-        {
-            this.result = new SendResult(error);
-        }
-
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
+        // TODO Auto-generated method stub
     }
 
-    public FailedFuture(Throwable error)
+    @Override
+    public void onMessage(InputStream partialMessage, boolean last)
     {
-        super(new FailedRunner(error));
-        run();
+        // TODO Auto-generated method stub
+
     }
 }

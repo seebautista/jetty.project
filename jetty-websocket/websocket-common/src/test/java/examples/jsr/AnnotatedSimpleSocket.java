@@ -16,35 +16,36 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common;
+package examples.jsr;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.websocket.SendResult;
+import javax.websocket.WebSocketEndpoint;
+import javax.websocket.WebSocketMessage;
 
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+/**
+ * Simple Socket showing @WebSocketMessage declarations
+ */
+@WebSocketEndpoint("/simple")
+public class AnnotatedSimpleSocket
 {
-    private static class FailedRunner implements Callable<SendResult>
+    private List<String> events = new ArrayList<>();
+
+    private void addEvent(String format, Object... args)
     {
-        private final SendResult result;
-
-        public FailedRunner(Throwable error)
-        {
-            this.result = new SendResult(error);
-        }
-
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
+        events.add(String.format(format,args));
     }
 
-    public FailedFuture(Throwable error)
+    @WebSocketMessage
+    public void onByteArray(byte buf[])
     {
-        super(new FailedRunner(error));
-        run();
+        addEvent("onByteArray(byte buf[])");
+    }
+
+    @WebSocketMessage
+    public void onText(String message)
+    {
+        addEvent("onTextMessage(String message)");
     }
 }

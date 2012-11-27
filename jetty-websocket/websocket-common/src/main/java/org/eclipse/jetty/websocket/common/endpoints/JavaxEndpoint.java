@@ -24,6 +24,8 @@ import javax.websocket.Session;
 
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.extensions.Frame;
+import org.eclipse.jetty.websocket.common.CloseInfo;
+import org.eclipse.jetty.websocket.common.message.MessageHandlerCollection;
 
 /**
  * Endpoint for objects that extend from {@link Endpoint javax.websocket.Endpoint}
@@ -53,18 +55,36 @@ public class JavaxEndpoint extends AbstractEndpoint
     @Override
     public void incomingFrame(Frame frame)
     {
-        // TODO Route frames to whatever session.messageHandler is appropriate
+        try
+        {
+            switch (frame.getType())
+            {
+                case CLOSE:
+                    CloseInfo close = new CloseInfo(frame);
+                    websocket.onClose(close.asCloseReason());
+                    break;
+                default:
+                    session.getMessageHandlerCollection().process(frame);
+                    break;
+            }
+        }
+        catch (Throwable t)
+        {
+            websocket.onError(t);
+        }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void onOpen(Session session)
     {
+        super.session.setMessageHandlerCollection(new MessageHandlerCollection());
         websocket.onOpen(session);
     }
 
     @Override
     public String toString()
     {
-        return String.format("%s[%s]", this.getClass().getSimpleName(), websocket);
+        return String.format("%s[%s]",this.getClass().getSimpleName(),websocket);
     }
 }

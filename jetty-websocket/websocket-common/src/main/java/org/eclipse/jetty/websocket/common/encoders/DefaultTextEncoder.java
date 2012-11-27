@@ -16,35 +16,16 @@
 //  ========================================================================
 //
 
-package org.eclipse.jetty.websocket.common;
+package org.eclipse.jetty.websocket.common.encoders;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import javax.websocket.EncodeException;
+import javax.websocket.Encoder;
 
-import javax.websocket.SendResult;
-
-public class FailedFuture extends FutureTask<SendResult> implements Future<SendResult>
+public class DefaultTextEncoder implements Encoder.Text<String>
 {
-    private static class FailedRunner implements Callable<SendResult>
+    @Override
+    public String encode(String message) throws EncodeException
     {
-        private final SendResult result;
-
-        public FailedRunner(Throwable error)
-        {
-            this.result = new SendResult(error);
-        }
-
-        @Override
-        public SendResult call() throws Exception
-        {
-            return result;
-        }
-    }
-
-    public FailedFuture(Throwable error)
-    {
-        super(new FailedRunner(error));
-        run();
+        return message;
     }
 }

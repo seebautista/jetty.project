@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.Future;
 
 import javax.websocket.EncodeException;
+import javax.websocket.Encoder;
 import javax.websocket.RemoteEndpoint;
 import javax.websocket.SendHandler;
 import javax.websocket.SendResult;
@@ -41,20 +42,22 @@ import org.eclipse.jetty.websocket.common.message.MessageWriter;
 /**
  * Endpoint for Writing messages to the Remote websocket.
  */
-public class WebSocketRemoteEndpoint implements RemoteEndpoint<Object>
+public class WebSocketRemoteEndpoint implements RemoteEndpoint
 {
     private static final Logger LOG = Log.getLogger(WebSocketRemoteEndpoint.class);
     public final LogicalConnection connection;
     public final OutgoingFrames outgoing;
+    public final EncoderCollection encoders;
     public MessageOutputStream stream;
     public MessageWriter writer;
 
-    public WebSocketRemoteEndpoint(LogicalConnection connection, OutgoingFrames outgoing)
+    public WebSocketRemoteEndpoint(EncoderCollection encoderCollection, LogicalConnection connection, OutgoingFrames outgoing)
     {
         if (connection == null)
         {
             throw new IllegalArgumentException("LogicalConnection cannot be null");
         }
+        this.encoders = encoderCollection;
         this.connection = connection;
         this.outgoing = outgoing;
     }
@@ -136,8 +139,7 @@ public class WebSocketRemoteEndpoint implements RemoteEndpoint<Object>
         }
         catch (IOException e)
         {
-            SendHandler handler = frame.getSendHandler();
-            return new FailedFuture(handler, e);
+            return new FailedFuture(e);
         }
     }
 
@@ -154,14 +156,25 @@ public class WebSocketRemoteEndpoint implements RemoteEndpoint<Object>
     }
 
     @Override
-    public Future<SendResult> sendBytes(ByteBuffer data, SendHandler completion)
+    public void sendBytesByCompletion(ByteBuffer data, SendHandler completion)
     {
         if (LOG.isDebugEnabled())
         {
-            LOG.debug("sendBytes({}, {})",BufferUtil.toDetailString(data),completion);
+            LOG.debug("sendBytesByCompletion({}, {})",BufferUtil.toDetailString(data),completion);
         }
         WebSocketFrame frame = WebSocketFrame.binary().setPayload(data);
         frame.setSendHandler(completion);
+        sendAsyncFrame(frame);
+    }
+
+    @Override
+    public Future<SendResult> sendBytesByFuture(ByteBuffer data)
+    {
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("sendBytesByFuture({})",BufferUtil.toDetailString(data));
+        }
+        WebSocketFrame frame = WebSocketFrame.binary().setPayload(data);
         return sendAsyncFrame(frame);
     }
 
@@ -180,14 +193,50 @@ public class WebSocketRemoteEndpoint implements RemoteEndpoint<Object>
     @Override
     public void sendObject(Object o) throws IOException, EncodeException
     {
-        // TODO Auto-generated method stub
+        Encoder encoder = encoders.getForObject(o);
+
+        // TODO: encode to appropriate flow.
+        // TEXT
+        // BINARY
+        // TEXT STREAM
+        // BINARY STREAM
     }
 
     @Override
-    public Future<SendResult> sendObject(Object o, SendHandler handler)
+    public void sendObjectByCompletion(Object o, SendHandler completion)
     {
-        // TODO Auto-generated method stub
-        return null;
+        try
+        {
+            Encoder encoder = encoders.getForObject(o);
+            // TODO: encode to appropriate flow.
+            // TEXT
+            // BINARY
+            // TEXT STREAM
+            // BINARY STREAM
+        }
+        catch (EncodeException e)
+        {
+            completion.setResult(new SendResult(e));
+        }
+    }
+
+    @Override
+    public Future<SendResult> sendObjectByFuture(Object o)
+    {
+        try
+        {
+            Encoder encoder = encoders.getForObject(o);
+            // TODO: encode to appropriate flow.
+            // TEXT
+            // BINARY
+            // TEXT STREAM
+            // BINARY STREAM
+            return null;
+        }
+        catch (EncodeException e)
+        {
+            return new FailedFuture(e);
+        }
     }
 
     @Override
@@ -233,11 +282,25 @@ public class WebSocketRemoteEndpoint implements RemoteEndpoint<Object>
         outgoing.outgoingFrame(frame);
     }
 
-    @Override
     public Future<SendResult> sendString(String text, SendHandler completion)
     {
         WebSocketFrame frame = WebSocketFrame.text(text);
         frame.setSendHandler(completion);
+        return sendAsyncFrame(frame);
+    }
+
+    @Override
+    public void sendStringByCompletion(String text, SendHandler completion)
+    {
+        WebSocketFrame frame = WebSocketFrame.text(text);
+        frame.setSendHandler(completion);
+        sendAsyncFrame(frame);
+    }
+
+    @Override
+    public Future<SendResult> sendStringByFuture(String text)
+    {
+        WebSocketFrame frame = WebSocketFrame.text(text);
         return sendAsyncFrame(frame);
     }
 }

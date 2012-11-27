@@ -23,9 +23,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,16 +56,18 @@ import org.eclipse.jetty.websocket.api.extensions.Frame;
 import org.eclipse.jetty.websocket.api.extensions.IncomingFrames;
 import org.eclipse.jetty.websocket.api.extensions.OutgoingFrames;
 import org.eclipse.jetty.websocket.common.endpoints.AbstractEndpoint;
+import org.eclipse.jetty.websocket.common.message.MessageHandlerCollection;
 
 @ManagedObject
-public class WebSocketSession extends ContainerLifeCycle implements Session<Object>, WebSocketConnection, IncomingFrames
+public class WebSocketSession extends ContainerLifeCycle implements Session, WebSocketConnection, IncomingFrames
 {
     private static final Logger LOG = Log.getLogger(WebSocketSession.class);
     private final URI requestURI;
     private final AbstractEndpoint endpoint;
     private final LogicalConnection connection;
-    private Set<MessageHandler> messageHandlers = new HashSet<>();
-    private List<Encoder> encoders = new ArrayList<>();
+    private MessageHandlerCollection messageHandlerCollection;
+    private EncoderCollection encoders = new EncoderCollection();
+    private DecoderCollection decoders = new DecoderCollection();
     private ExtensionFactory extensionFactory;
     private boolean active = false;
     private long inactiveTime;
@@ -113,7 +113,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public void addMessageHandler(MessageHandler listener)
     {
-        messageHandlers.add(listener);
+        messageHandlerCollection.add(listener);
     }
 
     public void assertValidMessageSize(int requestedSize)
@@ -204,10 +204,15 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
         return policy.getMaxMessageSize();
     }
 
+    public MessageHandlerCollection getMessageHandlerCollection()
+    {
+        return messageHandlerCollection;
+    }
+
     @Override
     public Set<MessageHandler> getMessageHandlers()
     {
-        return Collections.unmodifiableSet(messageHandlers);
+        return messageHandlerCollection.getHandlerSet();
     }
 
     @Override
@@ -253,20 +258,13 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     }
 
     @Override
-    public RemoteEndpoint<Object> getRemote()
+    public RemoteEndpoint getRemote()
     {
         if (!isOpen())
         {
             throw new WebSocketException("Session has not been opened yet");
         }
         return remote;
-    }
-
-    @Override
-    public RemoteEndpoint<Object> getRemote(Class<Object> c)
-    {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -356,7 +354,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
         }
 
         // Connect remote
-        remote = new WebSocketRemoteEndpoint(connection,outgoingHandler);
+        remote = new WebSocketRemoteEndpoint(encoders,connection,outgoingHandler);
 
         // Activate Session
         this.active = true;
@@ -380,7 +378,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public void removeMessageHandler(MessageHandler listener)
     {
-        messageHandlers.remove(listener);
+        messageHandlerCollection.remove(listener);
     }
 
     public void setActive(boolean active)
@@ -391,11 +389,7 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public void setEncoders(List<Encoder> encoders)
     {
-        this.encoders.clear();
-        if (encoders != null)
-        {
-            encoders.addAll(encoders);
-        }
+        this.encoders.setEncoders(encoders);
     }
 
     public void setExtensionFactory(ExtensionFactory extensionFactory)
@@ -407,6 +401,11 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     public void setMaximumMessageSize(long length)
     {
         policy.setMaxMessageSize(length);
+    }
+
+    public void setMessageHandlerCollection(MessageHandlerCollection messageHandlerCollection)
+    {
+        this.messageHandlerCollection = messageHandlerCollection;
     }
 
     public void setNegotiatedExtensions(List<String> negotiatedExtensions)
@@ -463,18 +462,18 @@ public class WebSocketSession extends ContainerLifeCycle implements Session<Obje
     @Override
     public Future<SendResult> write(byte[] buf, int offset, int len) throws IOException
     {
-        return remote.sendBytes(ByteBuffer.wrap(buf,offset,len),null);
+        return remote.sendBytesByFuture(ByteBuffer.wrap(buf,offset,len));
     }
 
     @Override
     public Future<SendResult> write(ByteBuffer buffer) throws IOException
     {
-        return remote.sendBytes(buffer,null);
+        return remote.sendBytesByFuture(buffer);
     }
 
     @Override
     public Future<SendResult> write(String message) throws IOException
     {
-        return remote.sendString(message,null);
+        return remote.sendStringByFuture(message);
     }
 }

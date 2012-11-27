@@ -20,6 +20,8 @@ package org.eclipse.jetty.websocket.common;
 
 import java.nio.ByteBuffer;
 
+import javax.websocket.CloseReason;
+
 import org.eclipse.jetty.util.BufferUtil;
 import org.eclipse.jetty.util.StringUtil;
 import org.eclipse.jetty.util.Utf8Appendable.NotUtf8Exception;
@@ -33,6 +35,22 @@ import org.eclipse.jetty.websocket.api.extensions.Frame;
 
 public class CloseInfo
 {
+    private static class SpecCloseCode implements CloseReason.CloseCode
+    {
+        private int code;
+
+        public SpecCloseCode(int code)
+        {
+            this.code = code;
+        }
+
+        @Override
+        public int getCode()
+        {
+            return this.code;
+        }
+    }
+
     private static final Logger LOG = Log.getLogger(CloseInfo.class);
     private int statusCode;
     private String reason;
@@ -146,6 +164,11 @@ public class CloseInfo
         }
         BufferUtil.flipToFlush(buf,0);
         return buf;
+    }
+
+    public CloseReason asCloseReason()
+    {
+        return new CloseReason(new SpecCloseCode(statusCode),reason);
     }
 
     public WebSocketFrame asFrame()
