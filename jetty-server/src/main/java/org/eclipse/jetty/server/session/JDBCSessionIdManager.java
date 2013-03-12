@@ -883,6 +883,7 @@ public class JDBCSessionIdManager extends AbstractSessionIdManager
             if (isRunning())
                 LOG.warn("Problem selecting expired sessions", e);
             else
+            	/*CB First time I've seen a ignore level! */
                 LOG.ignore(e);
         }
         finally

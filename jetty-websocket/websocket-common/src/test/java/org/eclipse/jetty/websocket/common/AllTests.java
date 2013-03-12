@@ -21,6 +21,7 @@ package org.eclipse.jetty.websocket.common;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+/*CB First time I've seen tests setup this way*/
 @RunWith(Suite.class)
 @Suite.SuiteClasses(
 { AcceptHashTest.class, ClosePayloadParserTest.class, GeneratorTest.class, ParserTest.class, PingPayloadParserTest.class, RFC6455ExamplesGeneratorTest.class,

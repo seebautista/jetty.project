@@ -210,6 +210,7 @@ public class Generator
      * Generate, into a ByteBuffer, no more than bufferSize of contents from the frame. If the frame exceeds the bufferSize, then multiple calls to
      * {@link #generate(int, WebSocketFrame)} are required to obtain each window of ByteBuffer to complete the frame.
      */
+    /*CB - This is a long method, wish I could follow though*/
     public synchronized ByteBuffer generate(int windowSize, Frame frame)
     {
         if (windowSize < OVERHEAD)

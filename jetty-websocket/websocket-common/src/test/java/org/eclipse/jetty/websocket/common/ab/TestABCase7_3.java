@@ -40,7 +40,7 @@ import org.eclipse.jetty.websocket.common.UnitParser;
 import org.eclipse.jetty.websocket.common.WebSocketFrame;
 import org.junit.Assert;
 import org.junit.Test;
-
+/*CB - interesting suffixes used for test methods?  I wonder what they actually map to? */
 public class TestABCase7_3
 {
     WebSocketPolicy policy = new WebSocketPolicy(WebSocketBehavior.CLIENT);

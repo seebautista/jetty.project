@@ -162,7 +162,7 @@ public class Request implements HttpServletRequest
     }
     
     
-
+    
     private boolean _secure;
     private boolean _asyncSupported = true;
     private boolean _newContext;
@@ -236,6 +236,7 @@ public class Request implements HttpServletRequest
     /**
      * Extract Parameters from query string and/or form _content.
      */
+    /* CB - This could be refactored! */
     public void extractParameters()
     {
         if (_baseParameters == null)
@@ -340,6 +341,7 @@ public class Request implements HttpServletRequest
                         }
                         catch (IOException e)
                         {
+                        	/* CB - what the difference? */
                             if (LOG.isDebugEnabled())
                                 LOG.warn(e);
                             else

@@ -58,7 +58,7 @@ public class FragmentExtensionTest
         ext.setConfig(config);
 
         ext.setNextIncomingFrames(capture);
-
+        /*CB - I love this, but I would have put this at the Before method setup*/
         // Quote
         List<String> quote = new ArrayList<>();
         quote.add("No amount of experimentation can ever prove me right;");

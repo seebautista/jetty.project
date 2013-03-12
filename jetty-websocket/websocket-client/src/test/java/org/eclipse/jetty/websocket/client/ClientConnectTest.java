@@ -120,6 +120,7 @@ public class ClientConnectTest
             future.get(500,TimeUnit.MILLISECONDS);
             Assert.fail("Expected ExecutionException -> UpgradeException");
         }
+        /*CB - very interesting, Asserts after an exception is thrown?*/
         catch (ExecutionException e)
         {
             // Expected Path
