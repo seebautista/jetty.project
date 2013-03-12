@@ -79,6 +79,7 @@ import org.eclipse.jetty.util.thread.ThreadPool;
 @ManagedObject(value="Jetty HTTP Servlet server")
 public class Server extends HandlerWrapper implements Attributes
 {
+	/*CB underscores for private variables?*/
     private static final Logger LOG = Log.getLogger(Server.class);
 
     private final AttributesMap _attributes = new AttributesMap();
